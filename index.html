@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plant Recognition Test</title>
+</head>
+<body>
+    <h1>Plant Recognition Test</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <input type="file" name="image" accept="image/*">
+        <button type="button" onclick="uploadImage()">Upload Image</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        function uploadImage() {
+            var formData = new FormData(document.getElementById('uploadForm'));
+
+            fetch('http://127.0.0.1:5000/get_plant_info', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                document.getElementById('result').innerHTML = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>
