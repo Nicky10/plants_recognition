@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS  # Import CORS from flask_cors
 from pymongo import MongoClient
 from tensorflow.keras.models import load_model
@@ -26,6 +26,27 @@ collection = database[collection_name]
 
 # Load the pre-trained ResNet50 model
 model = load_model(model_path)
+
+IMAGE_DATA_PATH = 'data'
+
+# Example endpoint to get a list of image filenames for a specific label
+@app.route('/get_images/<label>')
+def get_images(label):
+    image_folder_path = f'{IMAGE_DATA_PATH}/{label}'
+    print(f"Image folder path: {image_folder_path}")
+    try:
+        # Return a JSON response with a list of image filenames
+        image_filenames = os.listdir(image_folder_path)
+        print(f"Image filenames: {image_filenames}")
+        return jsonify(image_filenames)
+    except FileNotFoundError:
+        return jsonify({"error": "Label not found"}), 404
+
+@app.route('/get_image/<label>/<filename>')
+def get_image(label, filename):
+    image_path = os.path.join(IMAGE_DATA_PATH, label, filename)
+    return send_from_directory(IMAGE_DATA_PATH, os.path.join(label, filename))
+
 
 @app.route('/get_plant_info', methods=['POST'])
 def get_plant_info():

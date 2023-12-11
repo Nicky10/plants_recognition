@@ -1,22 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plant Recognition Test</title>
+    
 </head>
 <body>
-    <h1>Plant Recognition Test</h1>
-    <form id="uploadForm" enctype="multipart/form-data">
-        <input type="file" name="image" accept="image/*">
-        <button type="button" onclick="uploadImage()">Upload Image</button>
-    </form>
-    <div id="result"></div>
+    <div class="p-5 text-center bg-body-tertiary rounded-3">
+        <h1 class="display-5 fw-bold">Plant Recognition Test</h1>
+        <p class="col-lg-8 mx-auto fs-5 text-muted">
+            The plant recognition test website lets users upload leaf images for automated plant identification. Unique features include AI-driven image classification. Components include leaf descriptions, benefits, and scientific names. The site is a full-stack app, offering users an interface with structured data access over API. The primary goal is seamless image classification through a modern Machine Learning Model, taking advantage of the dataset of leaves images found to give the users an approach of what kind of plant have they found.
+        </p>
+        <div class="d-inline-flex gap-2 mb-5">
+            <form id="uploadForm" enctype="multipart/form-data">
+                <input type="file" name="image" accept="image/*">
+                <button type="button" class="btn btn-primary btn-lg" onclick="uploadImage()">Upload Image</button>
+            </form>
+        </div>
+
+        <!-- Display uploaded image -->
+        <div id="uploadedImageContainer" style="display:none;">
+            <h2 class="mt-4">Uploaded Image</h2>
+            <img id="uploadedImage" class="img-fluid" alt="Uploaded Image" style="max-width: 300px;">
+        </div>
+
+        <!-- Image grid container -->
+        <div id="imageGridContainer" class="mt-4" style="display:none;">
+            <h2>Related Images</h2>
+            <div class="row" id="imageGrid"></div>
+        </div>
+
+        <!-- Display JSON response -->
+        <div id="jsonContainer" style="display:none;">
+            <h2 class="mt-4">Plant Information</h2>
+            <div>
+                <h4>Label</h4>
+                <p id="label"></p>
+            </div>
+            <div>
+                <h4>Description</h4>
+                <p id="description"></p>
+            </div>
+        </div>
+
+        <!-- Copyright message -->
+        <div class="mt-5">
+            <p>&copy; 2023 AI For Software Developers. Group 1.</p>
+        </div>
+    </div>
 
     <script>
         function uploadImage() {
             var formData = new FormData(document.getElementById('uploadForm'));
-
+    
             fetch('http://127.0.0.1:5000/get_plant_info', {
                 method: 'POST',
                 body: formData
@@ -24,7 +63,58 @@
             .then(response => response.json())
             .then(data => {
                 console.log(data);
-                document.getElementById('result').innerHTML = JSON.stringify(data, null, 2);
+    
+                // Display uploaded image
+                var uploadedImageContainer = document.getElementById('uploadedImageContainer');
+                var uploadedImage = document.getElementById('uploadedImage');
+                uploadedImage.src = URL.createObjectURL(formData.get('image'));
+                uploadedImageContainer.style.display = 'block';
+    
+                // Display JSON response
+                var jsonContainer = document.getElementById('jsonContainer');
+                var description = document.getElementById('description');
+                var label = document.getElementById('label');
+    
+                description.textContent = data.description;
+                label.textContent = data.label.replace(/_/g, ' ');
+    
+                jsonContainer.style.display = 'block';
+    
+                // Get the root URL of the current location
+                var rootUrl = window.location.origin;
+
+                // Display image grid
+                var imageGridContainer = document.getElementById('imageGridContainer');
+                var imageGrid = document.getElementById('imageGrid');
+                imageGrid.innerHTML = ""; // Clear existing images
+
+                // Array to store image URLs
+                var imageUrls = [];
+
+                // Fetch images from the corresponding folder
+                fetch(`http://127.0.0.1:5000/get_images/${data.label}`)
+                    .then(response => response.json())
+                    .then(images => {
+                        // Display up to 6 images in the grid
+                        for (var i = 0; i < Math.min(images.length, 6); i++) {
+                            var imageSrc = `${rootUrl}/data/${data.label}/${images[i]}`;
+                            imageUrls.push(imageSrc); // Store the URL in the array
+
+                            var imageElement = document.createElement('div');
+                            imageElement.className = 'col-md-2';
+                            imageElement.innerHTML = `<img src="${imageSrc}" class="img-fluid" alt="Related Image">`;
+                            imageGrid.appendChild(imageElement);
+                        }
+
+                        // Display the image grid container
+                        imageGridContainer.style.display = 'block';
+
+                        // Use imageUrls array as needed
+                        console.log(imageUrls);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching images:', error);
+                    });
             })
             .catch(error => {
                 console.error('Error:', error);
