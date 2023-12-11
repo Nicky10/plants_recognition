@@ -15,3 +15,7 @@ Lets users upload leaf images for automated plant identification. Unique feature
     Flask (pip install flask)
     Flask-CORS (pip install flask-cors)
     PyMongo (pip install pymongo)
+
+# RUNNING THE PROJECT
+        Local Backend Server: Run the python file "back.py", located on the folder "Backend"
+        Local Frontend Server: Run the command python -m http.server
