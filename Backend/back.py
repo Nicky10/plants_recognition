@@ -1,25 +1,24 @@
 from flask import Flask, request, jsonify, send_from_directory
-from flask_cors import CORS  # Import CORS from flask_cors
+from flask_cors import CORS  
 from pymongo import MongoClient
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.applications.resnet50 import preprocess_input
 import numpy as np
 import pickle
+from dotenv import load_dotenv
 import os
 
 app = Flask(__name__)
 CORS(app)
 
-# Replace these values with your MongoDB connection details
-mongo_uri = "mongodb+srv://nicolasfelipedelgado:ERk7TbdktbAeHq6F@cluster0.qs1kmuw.mongodb.net/?retryWrites=true&w=majority"
-database_name = "plants"
-collection_name = "plants_descriptions"
+load_dotenv()  # This loads the environment variables from .env
 
-# Replace with the path to your trained model
-model_path = "plant_type_classifier_resnet_improved.h5"
+mongo_uri = os.getenv('MONGO_URI')
+database_name = os.getenv('DATABASE_NAME')
+collection_name = os.getenv('COLLECTION_NAME')
+model_path = os.getenv('MODEL_PATH')
 
-# Connect to MongoDB
 client = MongoClient(mongo_uri)
 database = client[database_name]
 collection = database[collection_name]

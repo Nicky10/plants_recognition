@@ -1,5 +1,5 @@
-# MEMBERS: 
-Nicolas Delgado, Joshua Jhon Emmanuel Sosa
+# MADE BY: 
+Nicolas Delgado
 
 # PROJECT TITLE: 
 Plant Recognition Test
